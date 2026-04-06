@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISMM — AI-ведение соцсетей под ключ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08080d;--bg2:#0e0e16;--card:#111119;--accent:#6c5ce7;--accent2:#a29bfe;--green:#00e676;--text:#eeeef2;--text2:#8888a0;--text3:#55556a;--border:rgba(255,255,255,.06);--r:16px}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.w{max-width:1140px;margin:0 auto;padding:0 24px}
+
+/* === AMBIENT === */
+.amb{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 600px 400px at 15% 20%,rgba(108,92,231,.05),transparent),radial-gradient(ellipse 500px 500px at 85% 70%,rgba(116,185,255,.03),transparent)}
+
+/* === NAV === */
+.nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(8,8,13,.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav .w{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+.logo-m{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
+.logo span{color:var(--accent2)}
+.nm{display:flex;align-items:center;gap:4px;list-style:none}
+.nm a{display:block;padding:8px 15px;font-size:13.5px;font-weight:500;color:var(--text2);border-radius:8px;transition:.2s}
+.nm a:hover,.nm a.act{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-cta{padding:9px 22px;border-radius:100px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:.2s;font-family:inherit}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(108,92,231,.35)}
+.burger{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:5px}
+.burger span{width:22px;height:2px;background:var(--text);border-radius:2px}
+.mob{display:none;position:fixed;top:64px;left:0;width:100%;background:rgba(8,8,13,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 24px;z-index:99}
+.mob.open{display:block}
+.mob a{display:block;padding:14px 0;font-size:15px;color:var(--text2);border-bottom:1px solid var(--border);transition:.2s}
+.mob a:last-child{border:none}
+.mob a:hover{color:var(--text)}
+
+/* === BUTTONS === */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 34px;border-radius:100px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.25s;font-family:inherit}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 24px rgba(108,92,231,.3)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(108,92,231,.45)}
+.btn-o{background:transparent;color:var(--text);border:1.5px solid rgba(255,255,255,.12)}
+.btn-o:hover{border-color:var(--accent);background:rgba(108,92,231,.05)}
+.btn-w{background:#fff;color:#08080d}
+.btn-w:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,255,255,.12)}
+.btn-sm{padding:11px 24px;font-size:13.5px}
+
+/* === SECTIONS === */
+.sec{padding:100px 0;position:relative}
+.sec-l{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:20px;background:rgba(108,92,231,.07);border:1px solid rgba(108,92,231,.15);color:var(--accent2)}
+.sec-l::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.sec-t{font-size:clamp(28px,4.5vw,48px);font-weight:800;line-height:1.12;margin-bottom:16px;letter-spacing:-.5px}
+.sec-s{font-size:17px;color:var(--text2);max-width:580px;line-height:1.7}
+.tc{text-align:center}
+.tc .sec-s{margin:0 auto}
+
+/* === HERO === */
+.hero{padding:150px 0 100px;min-height:100vh;display:flex;align-items:center;position:relative}
+.hero-c{max-width:680px;position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);padding:7px 18px;border-radius:100px;font-size:12.5px;color:var(--green);font-weight:600;margin-bottom:32px}
+.hdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:dp 2s infinite}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+.hero h1{font-size:clamp(36px,5.5vw,64px);font-weight:900;line-height:1.06;margin-bottom:24px;letter-spacing:-1px}
+.hero .gr{background:linear-gradient(135deg,var(--accent),var(--accent2),#74b9ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-d{font-size:18px;color:var(--text2);line-height:1.7;margin-bottom:40px;max-width:520px}
+.hero-b{display:flex;gap:14px;flex-wrap:wrap}
+.hero-m{display:flex;gap:48px;margin-top:60px;padding-top:36px;border-top:1px solid var(--border)}
+.hero-m div strong{display:block;font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-m div span{font-size:13px;color:var(--text3)}
+.h-glow{position:absolute;right:-100px;top:50%;transform:translateY(-50%);width:500px;height:500px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(108,92,231,.12),rgba(116,185,255,.06),transparent 70%);filter:blur(80px);pointer-events:none;animation:gf 10s ease-in-out infinite}
+@keyframes gf{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-55%) scale(1.04)}}
+
+/* === GRIDS === */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:50px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:50px}
+
+/* === CARDS === */
+.cd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;transition:.25s;position:relative;overflow:hidden}
+.cd::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:.25s}
+.cd:hover{border-color:rgba(108,92,231,.15);transform:translateY(-4px)}
+.cd:hover::before{opacity:1}
+.cd-i{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;background:rgba(108,92,231,.08);border:1px solid rgba(108,92,231,.12)}
+.cd-i svg{width:22px;height:22px;stroke:var(--accent2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cd h3{font-size:18px;font-weight:700;margin-bottom:10px}
+.cd>p{font-size:14px;color:var(--text2);line-height:1.7}
+
+/* === STEPS === */
+.steps{margin-top:56px;position:relative;padding-left:44px}
+.steps::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--accent),rgba(108,92,231,.05))}
+.st{display:flex;gap:28px;align-items:flex-start;padding:32px 0;position:relative}
+.st-n{width:40px;height:40px;min-width:40px;border-radius:50%;background:var(--bg);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--accent2);z-index:1;margin-left:-44px}
+.st-b h3{font-size:19px;font-weight:700;margin-bottom:6px}
+.st-b p{font-size:14px;color:var(--text2);max-width:480px;line-height:1.7}
+
+/* === PRICING === */
+.pr{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:36px 28px;display:flex;flex-direction:column;transition:.25s;position:relative}
+.pr:hover{transform:translateY(-6px);border-color:rgba(108,92,231,.2)}
+.pr.ft{border-color:var(--accent);box-shadow:0 0 60px rgba(108,92,231,.1)}
+.pr-bg{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:5px 20px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.pr-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:6px}
+.pr.ft .pr-t{color:var(--accent2)}
+.pr-n{font-size:24px;font-weight:800;margin-bottom:16px}
+.pr-p{display:flex;align-items:baseline;gap:4px;margin-bottom:6px}
+.pr-a{font-size:42px;font-weight:900;letter-spacing:-1px}
+.pr.ft .pr-a{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pr-per{font-size:15px;color:var(--text3)}
+.pr-d{font-size:13.5px;color:var(--text2);margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border);line-height:1.6}
+.pr ul{list-style:none;flex:1;margin-bottom:28px}
+.pr ul li{display:flex;align-items:flex-start;gap:12px;padding:9px 0;font-size:13.5px;color:var(--text2);line-height:1.5}
+.chk{width:18px;height:18px;min-width:18px;border-radius:50%;background:rgba(0,230,118,.08);display:flex;align-items:center;justify-content:center;margin-top:2px}
+.chk svg{width:10px;height:10px;stroke:var(--green);fill:none;stroke-width:2.5}
+.pr .btn{width:100%;justify-content:center}
+
+/* === ADDONS === */
+.addons{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:40px}
+.adn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;transition:.2s}
+.adn:hover{border-color:rgba(108,92,231,.15)}
+.adn-n{font-size:14.5px;font-weight:600}
+.adn-p{font-size:14.5px;font-weight:800;color:var(--accent2);white-space:nowrap}
+
+/* === CASES === */
+.cs{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:.25s}
+.cs:hover{transform:translateY(-4px);border-color:rgba(108,92,231,.15)}
+.cs-v{height:200px;display:flex;align-items:center;justify-content:center}
+.cs-v.a{background:linear-gradient(135deg,#12122a,#251a4a)}
+.cs-v.b{background:linear-gradient(135deg,#122a1a,#1a4a25)}
+.cs-v.c{background:linear-gradient(135deg,#2a1212,#4a1a25)}
+.cs-v span{font-size:14px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase}
+.cs-b{padding:28px}
+.cs-tag{display:inline-block;padding:4px 12px;border-radius:100px;font-size:11.5px;font-weight:600;background:rgba(108,92,231,.08);border:1px solid rgba(108,92,231,.12);color:var(--accent2);margin-bottom:12px}
+.cs-b h3{font-size:19px;font-weight:700;margin-bottom:8px}
+.cs-b>p{font-size:14px;color:var(--text2);line-height:1.65}
+.cs-st{display:flex;gap:24px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--text2)}
+.cs-st strong{color:var(--green)}
+
+/* === REVIEWS === */
+.rv{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;transition:.25s}
+.rv:hover{border-color:rgba(108,92,231,.15)}
+.rv-s{color:#f5c542;font-size:14px;margin-bottom:14px;letter-spacing:3px}
+.rv-t{font-size:14.5px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.rv-a{display:flex;align-items:center;gap:12px}
+.rv-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff}
+.rv-nm{font-size:14px;font-weight:700}
+.rv-rl{font-size:12px;color:var(--text3)}
+
+/* === FAQ === */
+.faq{max-width:740px;margin:56px auto 0}
+.fq{border-bottom:1px solid var(--border)}
+.fq-q{width:100%;background:none;border:none;color:var(--text);font-size:15.5px;font-weight:600;text-align:left;padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:inherit;transition:.2s}
+.fq-q:hover{color:var(--accent2)}
+.fq-q .arr{min-width:20px;transition:transform .3s;color:var(--accent)}
+.fq.open .fq-q .arr{transform:rotate(180deg)}
+.fq-a{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.fq-a div{padding:0 0 22px;font-size:14.5px;color:var(--text2);line-height:1.7}
+.fq.open .fq-a{max-height:300px}
+
+/* === CTA === */
+.cta{background:linear-gradient(145deg,rgba(108,92,231,.08),rgba(162,155,254,.03));border:1px solid rgba(108,92,231,.15);border-radius:24px;padding:80px 40px;text-align:center;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;inset:-50%;background:radial-gradient(circle,rgba(108,92,231,.04),transparent 50%);animation:cp 7s ease-in-out infinite}
+@keyframes cp{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.cta>*{position:relative;z-index:1}
+.cta h2{font-size:clamp(24px,3.5vw,40px);font-weight:800;margin-bottom:14px}
+.cta>p{font-size:16.5px;color:var(--text2);max-width:520px;margin:0 auto 36px;line-height:1.7}
+.cta-b{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* === FOOTER === */
+.ft{border-top:1px solid var(--border);padding:60px 0 36px;background:var(--bg2)}
+.ft-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+.ft-br{max-width:280px}
+.ft-br .logo{margin-bottom:14px}
+.ft-br p{font-size:13.5px;color:var(--text3);line-height:1.7}
+.ft-c h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin-bottom:16px}
+.ft-c a{display:block;font-size:14px;color:var(--text3);padding:5px 0;transition:.2s}
+.ft-c a:hover{color:var(--accent2)}
+.ft-bot{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px}
+.ft-bot span{font-size:13px;color:var(--text3)}
+
+/* === DIVIDER === */
+.divider{height:1px;background:var(--border);margin:0}
+
+/* === RESPONSIVE === */
+@media(max-width:900px){.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}.ft-g{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){
+.nm,.nav-cta{display:none}
+.burger{display:flex}
+.hero h1{font-size:32px}
+.hero-m{flex-wrap:wrap;gap:24px}
+.h-glow{display:none}
+.g3{grid-template-columns:1fr}
+.ft-g{grid-template-columns:1fr}
+.cta{padding:50px 24px}
+}
+</style>
+</head>
+<body>
+
+<div class="amb"></div>
+
+<!-- ====== NAVIGATION ====== -->
+<nav class="nav">
+<div class="w">
+<a href="#hero" class="logo"><span class="logo-m">AI</span><span class="logo-word">AIS<span>MM</span></span></a>
+<ul class="nm">
+<li><a href="#hero" class="act">Главная</a></li>
+<li><a href="#features">Преимущества</a></li>
+<li><a href="#how">Процесс</a></li>
+<li><a href="#pricing">Тарифы</a></li>
+<li><a href="#cases">Кейсы</a></li>
+<li><a href="#reviews">Отзывы</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ul>
+<a href="https://t.me/gettoden1" target="_blank" class="nav-cta">Написать в Telegram</a>
+<button class="burger" onclick="document.getElementById('mob').classList.toggle('open')"><span></span><span></span><span></span></button>
+</div>
+</nav>
+
+<div class="mob" id="mob">
+<a href="#hero" onclick="document.getElementById('mob').classList.remove('open')">Главная</a>
+<a href="#features" onclick="document.getElementById('mob').classList.remove('open')">Преимущества</a>
+<a href="#how" onclick="document.getElementById('mob').classList.remove('open')">Процесс</a>
+<a href="#pricing" onclick="document.getElementById('mob').classList.remove('open')">Тарифы</a>
+<a href="#cases" onclick="document.getElementById('mob').classList.remove('open')">Кейсы</a>
+<a href="#reviews" onclick="document.getElementById('mob').classList.remove('open')">Отзывы</a>
+<a href="#faq" onclick="document.getElementById('mob').classList.remove('open')">FAQ</a>
+<a href="https://t.me/gettoden1" target="_blank">Написать в Telegram →</a>
+</div>
+
+<!-- ====== HERO ====== -->
+<section class="hero" id="hero">
+<div class="w">
+<div class="hero-c">
+<div class="hero-tag"><span class="hdot"></span> Набираем клиентов — осталось 5 мест</div>
+<h1>Ведём ваши соцсети с помощью <span class="gr">искусственного интеллекта</span></h1>
+<p class="hero-d">Тексты, визуалы, контент-план и публикации под ключ. Быстрее, дешевле и стабильнее классического SMM-специалиста.</p>
+<div class="hero-b">
+<a href="#pricing" class="btn btn-p">Смотреть тарифы →</a>
+<a href="https://t.me/gettoden1" target="_blank" class="btn btn-o">Написать нам</a>
+</div>
+<div class="hero-m">
+<div><strong>50+</strong><span>проектов запущено</span></div>
+<div><strong>7 дней</strong><span>до первого контента</span></div>
+<div><strong>–70%</strong><span>дешевле агентства</span></div>
+</div>
+</div>
+</div>
+<div class="h-glow"></div>
+</section>
+
+<!-- ====== FEATURES ====== -->
+<section class="sec" id="features">
+<div class="w">
+<div class="sec-l">Преимущества</div>
+<div class="sec-t">Почему бизнес выбирает AI-ведение</div>
+<p class="sec-s">Совмещаем скорость ИИ и контроль редактора. Результат — регулярный, качественный контент без переплат.</p>
+<div class="g3">
+
+<div class="cd">
+<div class="cd-i"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+<h3>Быстрый запуск</h3>
+<p>Первый контент готов за 7 дней. Бриф, анализ ниши, контент-план и публикации — всё под ключ.</p>
+</div>
+
+<div class="cd">
+<div class="cd-i"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+<h3>Дешевле агентства в 3 раза</h3>
+<p>AI делает 80% рутины. Вы платите за результат, а не за часы работы SMM-специалиста.</p>
+</div>
+
+<div class="cd">
+<div class="cd-i"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+<h3>Визуал в стиле бренда</h3>
+<p>Индивидуальная стилистика, единый визуальный код. Ваш аккаунт выглядит как у топов ниши.</p>
+</div>
+
+<div class="cd">
+<div class="cd-i"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+<h3>Все площадки</h3>
+<p>Telegram, VK, Instagram, TikTok, Одноклассники, Дзен, YouTube Shorts — адаптируем под каждую.</p>
+</div>
+
+<div class="cd">
+<div class="cd-i"><svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
+<h3>Аналитика и корректировка</h3>
+<p>Ежемесячный отчёт, анализ вовлечённости, корректировка стратегии по реальным данным.</p>
+</div>
+
+<div class="cd">
+<div class="cd-i"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+<h3>AI + человеческий контроль</h3>
+<p>Нейросеть генерирует, редактор проверяет. Никакого «роботного» контента — только живые тексты.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ====== HOW IT WORKS ====== -->
+<section class="sec" id="how" style="background:rgba(108,92,231,.012)">
+<div class="w">
+<div class="sec-l">Процесс</div>
+<div class="sec-t">Как мы работаем</div>
+<p class="sec-s">От заявки до регулярных публикаций — 5 простых шагов.</p>
+<div class="steps">
+<div class="st"><div class="st-n">1</div><div class="st-b"><h3>Заявка и бриф</h3><p>Вы пишете нам в Telegram. Мы проводим созвон или отправляем анкету — разбираемся в вашей нише, продукте и аудитории.</p></div></div>
+<div class="st"><div class="st-n">2</div><div class="st-b"><h3>Анализ и стратегия</h3><p>Анализируем конкурентов, tone of voice, определяем рубрики и форматы контента для ваших площадок.</p></div></div>
+<div class="st"><div class="st-n">3</div><div class="st-b"><h3>Контент-план и визуал</h3><p>Формируем план на месяц: темы, тексты, визуалы в вашей стилистике. Согласовываем с вами перед публикацией.</p></div></div>
+<div class="st"><div class="st-n">4</div><div class="st-b"><h3>Публикация по графику</h3><p>Загружаем контент в систему автопостинга. Посты выходят регулярно, по расписанию — без вашего участия.</p></div></div>
+<div class="st"><div class="st-n">5</div><div class="st-b"><h3>Отчёт и масштабирование</h3><p>Каждый месяц — отчёт с аналитикой. Корректируем стратегию, усиливаем лучшие форматы, масштабируем результат.</p></div></div>
+</div>
+</div>
+</section>
+
+<!-- ====== PRICING ====== -->
+<section class="sec" id="pricing">
+<div class="w tc">
+<div class="sec-l">Тарифы</div>
+<div class="sec-t">Выберите подходящий план</div>
+<p class="sec-s">Прозрачные цены, понятный результат. Без скрытых платежей.</p>
+<div class="g3" style="margin-top:60px">
+
+<!-- BASE -->
+<div class="pr">
+<div class="pr-t">Тариф 01</div>
+<div class="pr-n">Базовый</div>
+<div class="pr-p"><span class="pr-a">9 900 ₽</span><span class="pr-per">/мес</span></div>
+<div class="pr-d">Идеально для экспертов, мастеров и малого бизнеса. Одна площадка, стабильный контент.</div>
+<ul>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Ведение 1 соцсети</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>12 постов в месяц</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Тексты + базовое оформление</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Контент-план на месяц</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Публикация по графику</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>1 созвон на старте</li>
+</ul>
+<a href="https://t.me/gettoden1" target="_blank" class="btn btn-o btn-sm">Оставить заявку</a>
+</div>
+
+<!-- STANDARD -->
+<div class="pr ft">
+<div class="pr-bg">Популярный выбор</div>
+<div class="pr-t">Тариф 02</div>
+<div class="pr-n">Стандарт</div>
+<div class="pr-p"><span class="pr-a">19 900 ₽</span><span class="pr-per">/мес</span></div>
+<div class="pr-d">Две площадки, индивидуальный визуал и адаптация контента под ваш бренд.</div>
+<ul>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Ведение 2 соцсетей</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>20 единиц контента в месяц</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Визуал в индивидуальной стилистике</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Адаптация под бренд и нишу</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Оформление рубрикатора</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Аналитика раз в месяц</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>2 созвона в месяц</li>
+</ul>
+<a href="https://t.me/gettoden1" target="_blank" class="btn btn-p btn-sm">Оставить заявку</a>
+</div>
+
+<!-- PREMIUM -->
+<div class="pr">
+<div class="pr-t">Тариф 03</div>
+<div class="pr-n">Премиум</div>
+<div class="pr-p"><span class="pr-a">39 900 ₽</span><span class="pr-per">/мес</span></div>
+<div class="pr-d">Полное ведение 3+ площадок, сценарии для видео, контент-стратегия и настройка под ключ.</div>
+<ul>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Ведение 3+ соцсетей</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Telegram, VK, Instagram, TikTok, ОК, Дзен</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Визуалы, карусели, обложки</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Сценарии для Reels / Shorts / TikTok</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Контент-стратегия и воронка</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Еженедельная координация</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Настройка всей системы под ключ</li>
+<li><span class="chk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Аналитика и корректировка плана</li>
+</ul>
+<a href="https://t.me/gettoden1" target="_blank" class="btn btn-o btn-sm">Оставить заявку</a>
+</div>
+
+</div>
+
+<!-- ADDONS -->
+<div style="margin-top:80px;text-align:left">
+<div class="sec-l">Дополнительно</div>
+<div class="sec-t" style="font-size:clamp(22px,3vw,34px)">Отдельные услуги</div>
+<div class="addons">
+<div class="adn"><span class="adn-n">Упаковка профиля</span><span class="adn-p">от 5 000 ₽</span></div>
+<div class="adn"><span class="adn-n">Контент-план на месяц</span><span class="adn-p">от 7 000 ₽</span></div>
+<div class="adn"><span class="adn-n">Сценарии Reels / Shorts</span><span class="adn-p">от 8 000 ₽</span></div>
+<div class="adn"><span class="adn-n">Пакет визуалов</span><span class="adn-p">от 10 000 ₽</span></div>
+<div class="adn"><span class="adn-n">Настройка автопостинга</span><span class="adn-p">от 7 000 ₽</span></div>
+<div class="adn"><span class="adn-n">Консультация по AI-SMM</span><span class="adn-p">от 3 000 ₽/час</span></div>
+<div class="adn"><span class="adn-n">Аудит соцсетей</span><span class="adn-p">от 4 900 ₽</span></div>
+<div class="adn"><span class="adn-n">Контент-воронка продаж</span><span class="adn-p">от 15 000 ₽</span></div>
+<div class="adn"><span class="adn-n">Настройка под ключ (разово)</span><span class="adn-p">от 20 000 ₽</span></div>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- ====== CASES ====== -->
+<section class="sec" id="cases" style="background:rgba(108,92,231,.012)">
+<div class="w">
+<div class="sec-l">Кейсы</div>
+<div class="sec-t">Результаты наших клиентов</div>
+<p class="sec-s">Реальные проекты, реальные цифры. Вот что получает бизнес с AI-ведением соцсетей.</p>
+<div class="g3">
+
+<div class="cs">
+<div class="cs-v a"><span>Beauty</span></div>
+<div class="cs-b">
+<span class="cs-tag">Бьюти-мастер</span>
+<h3>Косметолог — Telegram + VK</h3>
+<p>Запустили ведение двух площадок с нуля. Контент-план, тексты, визуал в единой стилистике. Клиент получает 3-4 заявки в неделю из соцсетей.</p>
+<div class="cs-st"><span>Охват: <strong>+340%</strong></span><span>Заявки: <strong>+12/мес</strong></span></div>
+</div>
+</div>
+
+<div class="cs">
+<div class="cs-v b"><span>Law</span></div>
+<div class="cs-b">
+<span class="cs-tag">Юридическая фирма</span>
+<h3>Юрист — Telegram-канал</h3>
+<p>Вели Telegram-канал для юриста: экспертные посты, кейсы, разборы законов. Канал вырос с 200 до 1 400 подписчиков за 3 месяца.</p>
+<div class="cs-st"><span>Подписчики: <strong>+600%</strong></span><span>Вовлечённость: <strong>8.2%</strong></span></div>
+</div>
+</div>
+
+<div class="cs">
+<div class="cs-v c"><span>Expert</span></div>
+<div class="cs-b">
+<span class="cs-tag">Онлайн-наставник</span>
+<h3>Эксперт — Instagram + Telegram + VK</h3>
+<p>Полное ведение 3 площадок по тарифу Премиум. Сценарии Reels, контент-воронка, визуал. Рост продаж курса на 35% за 2 месяца.</p>
+<div class="cs-st"><span>Продажи: <strong>+35%</strong></span><span>Охват: <strong>+520%</strong></span></div>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ====== REVIEWS ====== -->
+<section class="sec" id="reviews">
+<div class="w tc">
+<div class="sec-l">Отзывы</div>
+<div class="sec-t">Что говорят клиенты</div>
+<p class="sec-s">Нам доверяют эксперты, предприниматели и локальный бизнес по всей России.</p>
+<div class="g3">
+
+<div class="rv">
+<div class="rv-s">★★★★★</div>
+<div class="rv-t">«Наконец-то мои соцсети ведутся регулярно. Раньше я забрасывала Telegram на месяцы, сейчас контент выходит стабильно, а я занимаюсь клиентами.»</div>
+<div class="rv-a">
+<div class="rv-av">А</div>
+<div><div class="rv-nm">Анна М.</div><div class="rv-rl">Косметолог, Москва</div></div>
+</div>
+</div>
+
+<div class="rv">
+<div class="rv-s">★★★★★</div>
+<div class="rv-t">«Качество текстов удивило — не отличишь от живого копирайтера. При этом цена в 3 раза ниже, чем у моего прошлого SMM-щика. Рекомендую.»</div>
+<div class="rv-a">
+<div class="rv-av">Д</div>
+<div><div class="rv-nm">Дмитрий К.</div><div class="rv-rl">Юрист, Санкт-Петербург</div></div>
+</div>
+</div>
+
+<div class="rv">
+<div class="rv-s">★★★★★</div>
+<div class="rv-t">«Взял Премиум-тариф. Ведут 4 площадки, делают визуал, пишут сценарии для Reels. Рост продаж курса ощутимый. Лучшая инвестиция в маркетинг.»</div>
+<div class="rv-a">
+<div class="rv-av">И</div>
+<div><div class="rv-nm">Игорь С.</div><div class="rv-rl">Онлайн-наставник</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ====== FAQ ====== -->
+<section class="sec" id="faq" style="background:rgba(108,92,231,.012)">
+<div class="w tc">
+<div class="sec-l">FAQ</div>
+<div class="sec-t">Частые вопросы</div>
+<p class="sec-s">Отвечаем на самые популярные вопросы о нашем сервисе.</p>
+<div class="faq">
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+Контент реально пишет нейросеть?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>Да, основу текстов генерирует ИИ. Но каждый пост проходит ручную проверку редактора: мы адаптируем тон, стиль и смысл под ваш бренд. Финальный контент неотличим от работы живого копирайтера.</div></div>
+</div>
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+Как быстро вы начнёте публиковать?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>В среднем 5–7 дней от момента оплаты. За это время мы проводим бриф, анализируем нишу, создаём контент-план и первую партию постов. После вашего согласования — запускаем публикации.</div></div>
+</div>
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+Могу ли я вносить правки в посты?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>Конечно. Мы отправляем весь контент на согласование перед публикацией. Вы можете запросить правки — до 2 раундов корректировок входит в каждый тариф.</div></div>
+</div>
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+Какие соцсети вы ведёте?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>Telegram, VK, Instagram, TikTok, Одноклассники, Яндекс Дзен, YouTube Shorts и другие площадки по запросу. Количество зависит от выбранного тарифа.</div></div>
+</div>
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+А если мне не понравится результат?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>Первый месяц — тестовый. Если качество вас не устроит, мы вернём деньги за неиспользованный период. Но за 50+ проектов таких случаев ещё не было.</div></div>
+</div>
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+Как оплатить?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>Перевод по СБП, на карту или по счёту для ИП/ООО. Пишите нам в Telegram — подберём удобный вариант.</div></div>
+</div>
+
+<div class="fq">
+<button class="fq-q" onclick="this.parentElement.classList.toggle('open')">
+Есть ли договор?
+<span class="arr">▼</span>
+</button>
+<div class="fq-a"><div>Да, работаем по договору оферты. При необходимости заключаем индивидуальный договор с ИП или юрлицом.</div></div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ====== CTA ====== -->
+<section class="sec">
+<div class="w">
+<div class="cta">
+<h2>Готовы делегировать соцсети?</h2>
+<p>Напишите нам в Telegram — обсудим вашу задачу, подберём тариф и запустим контент за 7 дней.</p>
+<div class="cta-b">
+<a href="https://t.me/gettoden1" target="_blank" class="btn btn-p">Написать в Telegram →</a>
+<a href="#pricing" class="btn btn-o">Посмотреть тарифы</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer class="ft">
+<div class="w">
+<div class="ft-g">
+
+<div class="ft-br">
+<div class="logo"><span class="logo-m">AI</span><span>AIS<span style="color:var(--accent2)">MM</span></span></div>
+<p>AI-ведение соцсетей под ключ. Тексты, визуалы, контент-план и публикации для вашего бизнеса — быстро, стабильно, доступно.</p>
+</div>
+
+<div class="ft-c">
+<h4>Навигация</h4>
+<a href="#hero">Главная</a>
+<a href="#features">Преимущества</a>
+<a href="#how">Процесс</a>
+<a href="#pricing">Тарифы</a>
+</div>
+
+<div class="ft-c">
+<h4>Разделы</h4>
+<a href="#cases">Кейсы</a>
+<a href="#reviews">Отзывы</a>
+<a href="#faq">FAQ</a>
+</div>
+
+<div class="ft-c">
+<h4>Контакты</h4>
+<a href="https://t.me/gettoden1" target="_blank">Telegram: @gettoden1</a>
+<a href="mailto:hello@aismm.ru">hello@aismm.ru</a>
+<a href="#">Политика конфиденциальности</a>
+</div>
+
+</div>
+
+<div class="ft-bot">
+<span>&copy; 2025 AISMM. Все права защищены.</span>
+<span>Сделано с помощью AI</span>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
